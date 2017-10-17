@@ -143,12 +143,12 @@ entry:
 	inc	di
 	inc	si
 	jmp	.next_char
-	
+
 .end_of_command_line:
 	mov	byte [di], 0
 	mov	byte [si], 0
 	mov	[dos_cmdline_end], di
-	
+
 	;;
 	;; Make the argument list into a c string
 	;;
@@ -211,7 +211,7 @@ entry:
 	inc	si
 	jmp	.line_copy
 .done_copy:
-	mov	byte [si], 0	
+	mov	byte [si], 0
 	jmp	.next_module
 .no_next_module:
 
@@ -231,7 +231,7 @@ entry:
 
 	mov	dx, [_multiboot_mods_count]
 	shl	dx, 8
-	add	dx, _multiboot_module_strings	
+	add	dx, _multiboot_module_strings
 	mov	bx, [_multiboot_mods_count]
 	imul	bx, bx, multiboot_module_size
 	add	bx, _multiboot_modules
@@ -240,7 +240,7 @@ entry:
 	shl	eax, 4
 	add	eax, edx
 	mov	[bx + mbm_string], eax
-	
+
 	mov	bx, dx
 .copy_next_char
 	mov	al, [si]
@@ -332,7 +332,7 @@ entry:
 
 .lst_copy_bytes:
 	mov	bx,_lst_name_local
-	
+
 .lst_byte:
 	mov	al,[es:di]
 	inc	di
@@ -364,8 +364,8 @@ entry:
 
 	pop	es
 
-	jmp	.start_loading	
-			
+	jmp	.start_loading
+
 .pe_copy:
 	call	pe_load_module
 
@@ -405,15 +405,15 @@ entry:
 	mov	eax, 0
 	mov	ax, ds
 	shl	eax, 4
-	
+
 	mov	[_multiboot_info_base], eax
 	add	dword [_multiboot_info_base], _multiboot_info
-	
+
 	mov	dword [_multiboot_flags], 0xc
-  
+
 	mov	[_multiboot_cmdline], eax
 	add	dword [_multiboot_cmdline], _multiboot_kernel_cmdline
-	
+
 	;;
 	;; Hide the kernel's entry in the list of modules
 	;;
@@ -526,11 +526,11 @@ entry:
 .done_mmap:
 
 	pop ebx
-	
+
 	;;
 	;; Begin the pmode initalization
 	;;
-	
+
 	;;
 	;; Save cursor position
 	;;
@@ -622,7 +622,7 @@ entry:
 
 	;;
 	;; Load the multiboot magic value into eax
-	;;	
+	;;
 	mov	eax, 0x2badb002
 
 	;;
@@ -639,136 +639,7 @@ entry:
 	int	21h
 
 
-;
-; Print string in DS:DI
-;
-print_string:
-	push	ebp
-	mov	bp, sp
-	push	eax
-	push	edx
-	push	edi
-
-	mov	ax, 0x0200
-.loop:
-	mov	dl, [di]
-	cmp	dl, 0
-	je	.end_loop
-	cmp	dl, '%'
-	jne	.print_char
-	inc	di
-	mov	dl, [di]
-	cmp	dl, 'a'
-	jne	.not_ax
-	push	eax
-	mov	eax, [ss:bp - 4]
-	call	print_ax
-	pop	eax
-	jmp	.next_char
-
-.not_ax:
-	cmp	dl, 'A'
-	jne	.not_eax
-	push	eax
-	mov	eax, [ss:bp - 4]
-	call	print_eax
-	pop	eax
-	jmp	.next_char
-
-.not_eax:
-	cmp	dl, 'c'
-	jne	.not_cx
-	push	ax
-	mov	ax, cx
-	call	print_ax
-	pop	ax
-	jmp	.next_char
-
-.not_cx:
-
-.print_char:
-	int	0x21
-
-.next_char:
-	inc	di
-	jmp	.loop
-
-.end_loop:
-	pop	edi
-	pop	edx
-	pop	eax
-	pop	ebp
-	ret
-
-;
-; print_ax - print the number in the ax register
-;
-
-print_ax:
-	push	ax
-	push	bx
-	push	cx
-	push	dx
-
-	mov	bx, ax
-	mov	ax, 0x0200
-	mov	cx, 4
-.loop:
-	mov	dx, bx
-	shr	dx, 12
-	and	dl, 0x0f
-	cmp	dl, 0x0a
-	jge	.hex_val
-	add	dl, '0'
-	jmp	.not_hex
-
-.hex_val:
-	add	dl, 'a' - 10
-
-.not_hex:	
-	int	0x21
-	shl	bx, 4
-	dec	cx
-	jnz	.loop
-
-	pop	dx
-	pop	cx
-	pop	bx
-	pop	ax
-	ret
-
-print_eax:
-	push	eax
-	push	ebx
-	push	ecx
-	push	edx
-
-	mov	ebx, eax
-	mov	ax, 0x0200
-	mov	cx, 8
-.loop:
-	mov	edx, ebx
-	shr	edx, 28
-	and	dl, 0x0f
-	cmp	dl, 0x0a
-	jge	.hex_val
-	add	dl, '0'
-	jmp	.not_hex
-
-.hex_val:
-	add	dl, 'a' - 10
-
-.not_hex:
-	int	0x21
-	shl	ebx, 4
-	dec	cx
-	jnz	.loop
-
-	pop	edx
-	pop	ecx
-	pop	ebx
-	pop	eax
-	ret
+%include "print.asm"
 
 STRUC	pe_doshdr
 e_magic:	resw	1
@@ -818,10 +689,10 @@ _current_size:
 	dd 0
 _current_file_size:
 	dd 0
-	
+
 _lst_name_local:
 	times 2048 db 0
-	
+
 	;;
 	;; Load a SYM file
 	;;	DS:DX = Filename
@@ -891,7 +762,7 @@ pe_load_module:
 	mov	ebx, dword [_multiboot_mods_count]
 	cmp	ebx, 0
 	jne	.not_first
-	
+
 	mov	edx, 0
 	mov	ax, 0x4200
 	mov	cx, 0
@@ -912,7 +783,7 @@ pe_load_module:
 	jmp	error
 .mb_header_read:
 	jmp	.first
-	
+
 .not_first:
 	mov	dword [_mb_bss_end_addr], 0
 .first:
@@ -976,7 +847,7 @@ load_module2:
 	mov	dx, ax
 	mov	[_current_size], edx
 	mov	[_current_file_size], edx
-	
+
 	mov	edx, 0
 	mov	ax, 0x4200
 	mov	dx, 0
@@ -987,9 +858,9 @@ load_module2:
 	mov	di, error_file_seek_failed
 	jmp	error
 .start_seek
-	
+
 	mov	edi, [next_load_base]
-	
+
 .read_next:
 	cmp	dword [_current_size], 32768
 	jle	.read_tail
@@ -1086,8 +957,8 @@ load_module2:
 	mov	edx, [_mb_bss_end_addr]
 	cmp	edx, 0
 	je	.no_bss
-	mov	edi, edx	
-.no_bss:		
+	mov	edi, edx
+.no_bss:
 	test	di, 0xfff
 	jz	.no_round
 	and	di, 0xf000
@@ -1095,21 +966,21 @@ load_module2:
 .no_round:
 	ret
 
-load_module3:  
+load_module3:
 	mov	bx, [_multiboot_mods_count]
 	imul	bx, bx, multiboot_module_size
 	add	bx, _multiboot_modules
-	
+
 	mov	edx, [next_load_base]
 	mov	[bx + mbm_mod_start], edx
 	mov	[bx + mbm_mod_end], edi
 	mov	[next_load_base], edi
 	mov	dword [bx + mbm_reserved], 0
-	
+
 	inc	dword [_multiboot_mods_count]
 
 	mov	eax, 1
-	
+
 	ret
 
 	;;
@@ -1129,7 +1000,7 @@ error:
 	;; RETURNS
 	;;	EDI = End of the destination region
 	;;	ECX = 0
-	;; 
+	;;
 _himem_copy:
 	push	ds		; Save DS
 	push	es		; Save ES
@@ -1138,16 +1009,16 @@ _himem_copy:
 
 	cmp	eax, 0
 	je	.l3
-	
+
 	cli			; No interrupts during pmode
-	
+
 	mov	eax, cr0	; Entered protected mode
 	or	eax, 0x1
 	mov	cr0, eax
 
 	jmp	.l1		; Flush prefetch queue
 .l1:
-	
+
 	mov	eax, KERNEL_DS	; Load DS with a suitable selector
 	mov	ds, ax
 	mov	eax, KERNEL_DS
@@ -1167,9 +1038,9 @@ _himem_copy:
 	mov	eax, cr0	; Leave protected mode
 	and	eax, 0xfffffffe
 	mov	cr0, eax
-	
+
 	jmp	.l3
-.l3:	
+.l3:
 	sti
 	pop	esi
 	pop	eax
@@ -1194,7 +1065,7 @@ empty_8042:
 	jmp	empty_8042_1
 empty_8042_1:
 	jmp	empty_8042_2
-empty_8042_2:	
+empty_8042_2:
 	in	al,064h
 	test	al,02h
 	jnz	empty_8042
@@ -1237,7 +1108,7 @@ _multiboot_mem_upper:
 	dd	0x0
 _multiboot_boot_device:
 	dd	0x0
-_multiboot_cmdline:	
+_multiboot_cmdline:
 	dd	0x0
 _multiboot_mods_count:
 	dd	0x0
@@ -1260,7 +1131,7 @@ _multiboot_boot_loader_name:
 _multiboot_apm_table:
 	dd	0x0
 
-_multiboot_modules:	
+_multiboot_modules:
 	times (64*multiboot_module_size) db 0
 _multiboot_module_strings:
 	times (64*256) db 0
@@ -1277,7 +1148,7 @@ _multiboot_kernel_cmdline:
 	;;
 	;; Global descriptor table
 	;;
-_gdt:	
+_gdt:
 	dw	0x0		; Zero descriptor
 	dw	0x0
 	dw	0x0
@@ -1300,7 +1171,7 @@ _loader_code_base_16_23:
 	db	0x00
 	db	0x9a
 	dw	0x0000
-	
+
 	dw	0xffff		;  Loader data descriptor
 _loader_data_base_0_15:
 	dw	0x0000
