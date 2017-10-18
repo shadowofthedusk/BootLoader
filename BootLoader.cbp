@@ -5,6 +5,7 @@
 		<Option title="BootLoader" />
 		<Option makefile="makefile" />
 		<Option makefile_is_custom="1" />
+		<Option execution_dir="OSDev" />
 		<Option pch_mode="2" />
 		<Option compiler="null" />
 		<Build>
@@ -29,8 +30,19 @@
 				<Option compiler="null" />
 			</Target>
 		</Build>
-		<Unit filename="loadros.asm" />
-		<Unit filename="makefile" />
+		<Unit filename="BootLoader.layout" />
+		<Unit filename="OsDev/boot.asm" />
+		<Unit filename="OsDev/boot.bin" />
+		<Unit filename="OsDev/makefile" />
+		<Unit filename="Ros/gdt.asm" />
+		<Unit filename="Ros/loadros.asm" />
+		<Unit filename="Ros/loadros.bin" />
+		<Unit filename="Ros/makefile" />
+		<Unit filename="Ros/print.asm" />
+		<Unit filename="neOS/boot.asm" />
+		<Unit filename="neOS/boot.bin" />
+		<Unit filename="neOS/makefile" />
+		<Unit filename="neOS/print.asm" />
 		<Unit filename="rulez.mak" />
 		<Extensions>
 			<code_completion />
